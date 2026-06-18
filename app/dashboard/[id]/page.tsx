@@ -378,7 +378,7 @@ export default function AppDetails() {
 
                         <div className="bg-black/60 rounded-xl overflow-hidden border border-white/5">
                             <div className="bg-white/5 px-4 py-2 border-b border-white/5 flex items-center justify-between">
-                                <span className="text-[10px] text-white/40 uppercase font-bold">Javascript SDK</span>
+                                <span className="text-[10px] text-white/40 uppercase font-bold">@xorr/sdk · Buy Now, Pay Never</span>
                                 <div className="flex gap-1.5">
                                     <div className="w-2 h-2 rounded-full bg-red-500/20" />
                                     <div className="w-2 h-2 rounded-full bg-yellow-500/20" />
@@ -386,26 +386,43 @@ export default function AppDetails() {
                                 </div>
                             </div>
                             <pre className="p-6 text-xs text-teal-100/70 overflow-x-auto leading-relaxed">
-                                {`// 1. Create a Bill via API
-const res = await fetch('https://polaris.link/api/bills/create', {
-  method: 'POST',
-  headers: {
-    'x-client-id': '${app.client_id}',
-    'x-client-secret': '${app.client_secret}',
-    'Content-Type': 'application/json'
-  },
-  body: JSON.stringify({
-    amount: 125.50,
-    description: 'Order #1024'
-  })
+                                {`// 1. Install
+//    npm install @xorr/sdk
+
+// 2. SERVER — e.g. app/api/xorr-checkout/route.ts
+//    Keep the secret in an env var; never ship it to the browser.
+import { XorrClient } from "@xorr/sdk";
+
+const xorr = new XorrClient({
+  clientId: "${app.client_id}",
+  clientSecret: process.env.XORR_CLIENT_SECRET!,
 });
 
-const { checkoutUrl } = await res.json();
+export async function POST() {
+  const { checkoutUrl } = await xorr.createCheckout({
+    amount: 125.50,
+    orderId: "order_1024",
+    description: "Order #1024",
+  });
+  return Response.json({ checkoutUrl });
+}
 
-// 2. Redirect user to authorization
-window.location.href = checkoutUrl;`}
+// 3. CLIENT — drop the button on your shopping site
+import { PayWithXorr } from "@xorr/sdk/react";
+
+<PayWithXorr
+  createCheckout={() =>
+    fetch("/api/xorr-checkout", { method: "POST" }).then((r) => r.json())
+  }
+  onSuccess={(r) => console.log("paid!", r.txDigest, r.loanId)}
+/>`}
                             </pre>
                         </div>
+                        <p className="text-[11px] text-white/30 mt-3 leading-relaxed">
+                            Your client secret stays server-side. The shopper picks <span className="text-primary/70">Pay Never</span> (collateral earns
+                            yield that auto-repays) or pays in full — credit is scored privately in the TEE. You get back the
+                            Sui <code className="text-white/50">txDigest</code> and <code className="text-white/50">loanId</code>.
+                        </p>
                     </section>
 
                     <section className="bg-white/[0.03] border border-white/10 rounded-2xl p-6">
