@@ -57,3 +57,26 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
     return NextResponse.json({ app: result });
 }
+
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
+    const walletAddress = req.headers.get('x-wallet-address');
+
+    if (!id || !walletAddress) return NextResponse.json({ error: 'Missing ID or wallet address' }, { status: 400 });
+
+    try {
+        const db = await getDb();
+        // Ownership check before deleting.
+        const app = await db.collection('merchant_apps').findOne({ _id: new ObjectId(id), user_id: walletAddress });
+        if (!app) return NextResponse.json({ error: 'App not found or unauthorized' }, { status: 404 });
+
+        await db.collection('merchant_apps').deleteOne({ _id: new ObjectId(id), user_id: walletAddress });
+        // Clean up related records.
+        await db.collection('merchant_bills').deleteMany({ app_id: new ObjectId(id) });
+        await db.collection('webhooks').deleteMany({ app_id: id });
+
+        return NextResponse.json({ success: true });
+    } catch {
+        return NextResponse.json({ error: 'Internal error' }, { status: 500 });
+    }
+}

@@ -6,7 +6,7 @@ import { ConnectModal, useCurrentAccount } from '@mysten/dapp-kit';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import useSWR, { mutate } from 'swr';
-import { Plus, Loader2, LayoutGrid, ArrowRight, Zap, Code2 } from 'lucide-react';
+import { Plus, Loader2, LayoutGrid, ArrowRight, Zap, Code2, Trash2 } from 'lucide-react';
 
 export default function Dashboard() {
     const account = useCurrentAccount();
@@ -45,6 +45,18 @@ export default function Dashboard() {
             return res.json();
         }
     );
+
+    const handleDelete = async (id: string, name: string) => {
+        if (!account?.address) return;
+        if (!confirm(`Delete "${name}"? This removes the store, its API keys, and bills — and can't be undone.`)) return;
+        try {
+            const res = await fetch(`/api/apps/${id}`, { method: 'DELETE', headers: { 'x-wallet-address': account.address } });
+            if (!res.ok) throw new Error('Delete failed');
+            mutate('/api/apps');
+        } catch {
+            alert('Failed to delete store.');
+        }
+    };
 
     const handleCreateApp = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -178,11 +190,18 @@ export default function Dashboard() {
                                 <h3 className="text-lg font-black uppercase italic mb-1 group-hover:text-primary transition-colors">{app.name}</h3>
                                 <p className="text-xs text-white/40 uppercase tracking-widest mb-6">{app.category || 'General'}</p>
 
-                                <div className="flex items-center gap-2">
-                                    <span className={`w-2 h-2 rounded-full ${app.status === 'active' ? 'bg-green-500' : 'bg-yellow-500'}`} />
-                                    <span className="text-[10px] text-white/60 font-mono uppercase">
-                                        {app.status}
-                                    </span>
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <span className={`w-2 h-2 rounded-full ${app.status === 'active' ? 'bg-green-500' : 'bg-yellow-500'}`} />
+                                        <span className="text-[10px] text-white/60 font-mono uppercase">{app.status}</span>
+                                    </div>
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); handleDelete(app._id, app.name); }}
+                                        title="Delete store"
+                                        className="opacity-0 group-hover:opacity-100 text-white/30 hover:text-red-400 transition-all p-1.5 rounded-lg hover:bg-red-500/10"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
                                 </div>
                             </div>
                         ))}

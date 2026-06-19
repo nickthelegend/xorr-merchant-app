@@ -8,7 +8,7 @@ import type { SuiJsonRpcClient } from "@mysten/sui/jsonRpc";
 import { MERCHANT_ESCROW_PACKAGE_ID, USDT_DECIMALS } from "./sui";
 
 const PKG = MERCHANT_ESCROW_PACKAGE_ID;
-const T = `${PKG}::usdt::USDT`;
+const T = `${PKG}::usdc::USDC`;
 const SCALE = 10 ** USDT_DECIMALS;
 
 /** Convert a human USDT amount to on-chain u64 base units. */

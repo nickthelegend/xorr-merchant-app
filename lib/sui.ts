@@ -21,10 +21,10 @@ export const SUI_RPC_URLS: Record<SuiNetwork, string> = {
  *  Defaults to the published v2 package (override via env). */
 export const MERCHANT_ESCROW_PACKAGE_ID =
   process.env.NEXT_PUBLIC_MERCHANT_ESCROW_PACKAGE_ID ??
-  "0x9572997e5d494f961fc9b2260b8c085a1b20b16bd1495f3972b7dfda0ff11a40";
+  "0xa105190b2218938815920010957f7adf856940452e304a63e195e132f14713b9";
 
-/** Settlement coin type — `usdt::USDT` lives in the same published package. */
-export const USDT_COIN_TYPE = `${MERCHANT_ESCROW_PACKAGE_ID}::usdt::USDT`;
+/** Settlement coin type — `usdc::USDC` lives in the same published package. */
+export const USDT_COIN_TYPE = `${MERCHANT_ESCROW_PACKAGE_ID}::usdc::USDC`;
 
 // USDT/USDC are both 6-decimal in this demo. Kept as USDC_DECIMALS for the
 // existing UI copy; USDT settlement uses the same scale.
