@@ -120,6 +120,7 @@ export default function Dashboard() {
                     <div>
                         <h2 className="text-2xl font-bold mb-2">Your Applications</h2>
                         <p className="text-sm text-white/40">Manage integration keys and view analytics.</p>
+                        <a href="/dashboard/analytics" className="inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline mt-1">View settlement analytics →</a>
                     </div>
 
                     {/* Simple Create Form */}
