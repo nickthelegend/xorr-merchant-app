@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/mongodb';
+import { hashSecret } from '@/lib/secret';
 import crypto from 'crypto';
 
 // Demo merchant for the XORR shopping-app → /pay → Sui settlement flow.
@@ -30,7 +31,7 @@ export async function GET() {
             name: 'XORR Demo Shop',
             category: 'E-commerce',
             client_id,
-            client_secret,
+            client_secret_hash: hashSecret(client_secret), // store only the hash
             network: 'sui:testnet',
             asset: 'USDC',
             escrow_contract: DEMO_ESCROW,

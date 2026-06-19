@@ -12,10 +12,10 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
     // Verify ownership and get app
     // In our simplified MongoDB schema, we link merchant_apps using user_id: walletAddress
-    const app = await db.collection('merchant_apps').findOne({ 
-        _id: new ObjectId(id),
-        user_id: walletAddress 
-    });
+    const app = await db.collection('merchant_apps').findOne(
+        { _id: new ObjectId(id), user_id: walletAddress },
+        { projection: { client_secret: 0, client_secret_hash: 0 } }
+    );
 
     if (!app) {
         return NextResponse.json({ error: 'App not found or unauthorized' }, { status: 404 });
@@ -33,14 +33,16 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
     const db = await getDb();
 
-    // Update with ownership verification
+    // Whitelist updatable fields — never allow client_secret/client_id/user_id/_id/
+    // escrow_contract/status to be overwritten via this route (mass-assignment guard).
+    const update: Record<string, unknown> = { updated_at: new Date() };
+    if (typeof body.name === 'string') update.name = body.name;
+    if (typeof body.category === 'string') update.category = body.category;
+
     const result = await db.collection('merchant_apps').findOneAndUpdate(
-        { 
-            _id: new ObjectId(id),
-            user_id: walletAddress 
-        },
-        { $set: { ...body, updated_at: new Date() } },
-        { returnDocument: 'after' }
+        { _id: new ObjectId(id), user_id: walletAddress },
+        { $set: update },
+        { returnDocument: 'after', projection: { client_secret: 0, client_secret_hash: 0 } }
     );
 
     if (!result) {

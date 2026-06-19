@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { getDb } from "@/lib/mongodb";
+import { verifySecret } from "@/lib/secret";
 
 export async function POST(req: Request) {
   const clientId = req.headers.get("x-client-id");
@@ -18,10 +19,10 @@ export async function POST(req: Request) {
   }
 
   const db = await getDb();
-  // Note: in merchant app collections are 'merchant_apps'
-  const app = await db.collection("merchant_apps").findOne({ client_id: clientId, client_secret: clientSecret });
+  // Auth: look up by client_id, then constant-time compare the hashed secret.
+  const app = await db.collection("merchant_apps").findOne({ client_id: clientId });
 
-  if (!app) {
+  if (!app || !verifySecret(clientSecret, app.client_secret_hash)) {
     return NextResponse.json({ error: "Invalid API Credentials" }, { status: 403 });
   }
 

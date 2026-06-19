@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/mongodb';
+import { hashSecret } from '@/lib/secret';
 import crypto from 'crypto';
 
 export async function GET(req: NextRequest) {
@@ -21,6 +22,7 @@ export async function GET(req: NextRequest) {
     // 2. Get Apps
     const apps = await db.collection('merchant_apps')
         .find({ user_id: walletAddress })
+        .project({ client_secret: 0, client_secret_hash: 0 }) // never expose secrets
         .sort({ created_at: -1 })
         .toArray();
 
@@ -70,7 +72,7 @@ export async function POST(req: NextRequest) {
         }
 
         // 3. Create App with unique credentials (crypto.randomUUID for client_id, randomBytes for secret)
-        const client_id = `prod_${crypto.randomUUID().replace(/-/g, '')}`;
+        const client_id = `xorr_${crypto.randomUUID().replace(/-/g, '')}`;
         const client_secret = `sk_${crypto.randomBytes(24).toString('hex')}`;
 
         const newApp = {
@@ -79,8 +81,8 @@ export async function POST(req: NextRequest) {
             name,
             category: category || '',
             client_id,
-            client_secret,
-            network: 'sepolia',
+            client_secret_hash: hashSecret(client_secret), // store only the hash
+            network: 'sui:testnet',
             status: 'active',
             created_at: new Date(),
             updated_at: new Date()
@@ -88,7 +90,8 @@ export async function POST(req: NextRequest) {
 
         const result = await db.collection('merchant_apps').insertOne(newApp);
 
-        return NextResponse.json({ app: { ...newApp, _id: result.insertedId } });
+        // Return the plaintext secret ONCE — it is not stored and can't be shown again.
+        return NextResponse.json({ app: { ...newApp, _id: result.insertedId, client_secret } });
     } catch (error: any) {
         console.error('Create App Error:', error);
         return NextResponse.json({ error: error.message }, { status: 500 });
