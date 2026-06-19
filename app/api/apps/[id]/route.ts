@@ -14,7 +14,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     // In our simplified MongoDB schema, we link merchant_apps using user_id: walletAddress
     const app = await db.collection('merchant_apps').findOne(
         { _id: new ObjectId(id), user_id: walletAddress },
-        { projection: { client_secret: 0, client_secret_hash: 0 } }
+        { projection: { client_secret_hash: 0 } } // owner may reveal their own client_secret
     );
 
     if (!app) {
@@ -38,11 +38,17 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     const update: Record<string, unknown> = { updated_at: new Date() };
     if (typeof body.name === 'string') update.name = body.name;
     if (typeof body.category === 'string') update.category = body.category;
+    // Owner-set on-chain config (Deploy Escrow links these). Still blocks
+    // client_secret / client_id / user_id / _id / status from being overwritten.
+    if (typeof body.escrow_contract === 'string') update.escrow_contract = body.escrow_contract;
+    if (typeof body.escrow_cap === 'string') update.escrow_cap = body.escrow_cap;
+    if (typeof body.sui_address === 'string') update.sui_address = body.sui_address;
+    if (typeof body.network === 'string') update.network = body.network;
 
     const result = await db.collection('merchant_apps').findOneAndUpdate(
         { _id: new ObjectId(id), user_id: walletAddress },
         { $set: update },
-        { returnDocument: 'after', projection: { client_secret: 0, client_secret_hash: 0 } }
+        { returnDocument: 'after', projection: { client_secret_hash: 0 } }
     );
 
     if (!result) {

@@ -81,7 +81,8 @@ export async function POST(req: NextRequest) {
             name,
             category: category || '',
             client_id,
-            client_secret_hash: hashSecret(client_secret), // store only the hash
+            client_secret, // kept so the owner can reveal it in their dashboard (testnet)
+            client_secret_hash: hashSecret(client_secret),
             network: 'sui:testnet',
             status: 'active',
             created_at: new Date(),

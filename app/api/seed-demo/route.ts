@@ -31,7 +31,8 @@ export async function GET() {
             name: 'XORR Demo Shop',
             category: 'E-commerce',
             client_id,
-            client_secret_hash: hashSecret(client_secret), // store only the hash
+            client_secret, // kept for dashboard reveal (testnet demo)
+            client_secret_hash: hashSecret(client_secret),
             network: 'sui:testnet',
             asset: 'USDC',
             escrow_contract: DEMO_ESCROW,
