@@ -83,7 +83,7 @@ export const PayWithPolaris: React.FC<PayWithPolarisProps> = ({
             const need = BigInt(Math.floor(amount * 10 ** USDT_DECIMALS));
             const coin = coins.find((c) => BigInt(c.balance) >= need);
             if (!coin) {
-                throw new Error(`Insufficient USDT balance to pay ${amount}. Fund your wallet and try again.`);
+                throw new Error(`Insufficient USDC balance to pay ${amount}. Fund your wallet and try again.`);
             }
 
             const tx = settlePaymentTx(escrowAddress, coin.coinObjectId, amount, orderId, account.address);

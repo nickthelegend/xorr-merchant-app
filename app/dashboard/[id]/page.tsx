@@ -11,10 +11,8 @@
 //   - fetchLogs:             reads PaymentSettled events via SuiClient.queryEvents.
 //   - The Sepolia chain-switch / chainId banner is EVM-only and has been removed.
 //
-// STILL STUBBED (no Sui FHE equivalent — needs a redesigned Move module):
-//   - handleRouterWithdraw:  encrypted/credit settlement withdrawal + finalize
-//                            (was: MerchantRouter.merchantWithdraw + CoFHE decrypt).
-//   - fetchRouterBalance:    read encrypted merchant balance.
+// REMOVED: the FHE "Credit Settlement" panel (fetchRouterBalance / handleRouterWithdraw)
+//   — Sui has no FHE; BNPL/credit funds settle through merchant_escrow instead.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const dynamic = 'force-dynamic';
@@ -61,8 +59,6 @@ export default function AppDetails() {
     const [refreshingLogs, setRefreshingLogs] = useState(false);
     const [withdrawing, setWithdrawing] = useState(false);
     const [balance, setBalance] = useState('0.00');
-    const [routerWithdrawing, setRouterWithdrawing] = useState(false);
-    const [routerBalance, setRouterBalance] = useState('0.00');
 
     // Avoid hydration mismatch: dapp-kit hydrates the wallet on the client.
     useEffect(() => setMounted(true), []);
@@ -152,41 +148,8 @@ export default function AppDetails() {
         }
     }, [app?.escrow_contract]);
 
-    const fetchRouterBalance = async () => {
-        if (!account?.address) return;
-        // TODO(xorr): no Sui FHE equivalent.
-        // The old flow read an FHE-encrypted merchant balance from MerchantRouter
-        // and decrypted it client-side via CoFHE. Credit settlement needs a
-        // redesigned Move module before this can be wired. Left inert.
-        setRouterBalance('0.00');
-    };
-
-    useEffect(() => {
-        if (account?.address && app) {
-            fetchRouterBalance();
-            const int = setInterval(fetchRouterBalance, 15000);
-            return () => clearInterval(int);
-        }
-    }, [account?.address, app]);
-
-    const handleRouterWithdraw = async () => {
-        if (!account?.address) return;
-        setRouterWithdrawing(true);
-        setError('');
-        try {
-            // TODO(xorr): no Sui FHE equivalent.
-            // Old flow: MerchantRouter.merchantWithdraw of an FHE-encrypted balance,
-            // then PoolManager.finalizeWithdrawal with a CoFHE decryption signature.
-            // Needs a redesigned Move credit-settlement module before it can be
-            // ported; the direct USDT escrow withdraw above is the working path.
-            throw new Error('Credit settlement (FHE) has no Sui equivalent yet.');
-        } catch (e: any) {
-            console.error(e);
-            setError(e.message || 'Router withdrawal failed');
-        } finally {
-            setRouterWithdrawing(false);
-        }
-    };
+    // Credit-settlement (FHE) panel removed — Sui has no FHE. BNPL/credit funds
+    // settle through the merchant_escrow Move module (fetchBalance / fetchLogs above).
 
     const handleWithdraw = async () => {
         if (!account?.address || !app?.escrow_contract) return;
@@ -622,7 +585,7 @@ import { PayWithXorr } from "@xorr/sdk/react";
                             </div>
                             <div className="flex justify-between text-[11px]">
                                 <span className="text-white/30">Currency</span>
-                                <span className="text-white/60 font-bold">USDT (Mock)</span>
+                                <span className="text-white/60 font-bold">USDC (Mock)</span>
                             </div>
                             <div className="flex justify-between text-[11px]">
                                 <span className="text-white/30">Module</span>
@@ -631,29 +594,8 @@ import { PayWithXorr } from "@xorr/sdk/react";
                         </div>
                     </section>
 
-                    {/* MerchantRouter Withdrawal */}
-                    <section className="bg-white/[0.03] border border-white/10 rounded-2xl p-6 relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-24 h-24 bg-teal-500/10 blur-3xl -mr-12 -mt-12" />
-
-                        <div className="flex items-center gap-2 mb-4">
-                            <Wallet className="w-5 h-5 text-primary" />
-                            <h2 className="text-lg font-bold">Credit Settlement</h2>
-                        </div>
-
-                        <p className="text-[10px] text-white/40 mb-4 leading-relaxed">
-                            Funds received via BNPL and Split-in-3 payments through the MerchantRouter contract.
-                        </p>
-
-                        <div className="bg-primary/5 border border-primary/10 rounded-xl p-4 mb-3">
-                            <div className="text-[9px] uppercase font-bold text-primary/50 mb-1">Total Settled</div>
-                            <div className="text-2xl font-bold text-white">{routerBalance} <span className="text-sm text-white/40">USDC</span></div>
-                            <p className="text-[9px] text-white/20 mt-2">On-chain balance from BNPL &amp; Split-in-3 credit payments</p>
-                        </div>
-
-                        {parseFloat(routerBalance) === 0 && (
-                            <p className="text-[10px] text-white/20 italic text-center">No funds available for withdrawal</p>
-                        )}
-                    </section>
+                    {/* The FHE "Credit Settlement" panel was removed — Sui has no FHE.
+                        Escrow balance + PaymentSettled history are shown above (merchant_escrow). */}
                 </div>
             </main>
         </div>
