@@ -12,6 +12,10 @@ const jetBrainsMono = JetBrains_Mono({
 export const metadata = {
   title: 'Polaris Protocol | Seamless Payment Integration',
   description: 'Integrate crypto payments with one line of code.',
+  icons: {
+    icon: '/xorr-logo.png',
+    apple: '/xorr-logo.png',
+  },
 };
 
 export default function RootLayout({
