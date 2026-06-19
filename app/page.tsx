@@ -18,7 +18,7 @@ export default function Home() {
                 <div className="max-w-4xl mx-auto text-center relative z-10">
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-primary/20 bg-primary/5 text-primary text-[10px] font-bold uppercase tracking-[0.2em] mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
                         <Zap className="w-3 h-3" />
-                        Polaris Protocol v1.0
+                        XORR v1.0
                     </div>
 
                     <div className="flex justify-center mb-10 animate-in fade-in slide-in-from-bottom-6 duration-1000">
@@ -34,7 +34,7 @@ export default function Home() {
 
                     <p className="text-lg text-white/50 max-w-2xl mx-auto mb-10 leading-relaxed animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-100 font-medium">
                         The complete payment stack for web3 developers. Integrate decentralized payments,
-                        generate bills, and settle on-chain instantly on Ethereum Sepolia.
+                        generate bills, and settle on-chain instantly on Sui Testnet.
                     </p>
 
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-10 duration-1000 delay-200">
@@ -70,7 +70,7 @@ export default function Home() {
                     <FeatureCard
                         icon={<Zap className="w-6 h-6 text-primary" />}
                         title="Instant Sync"
-                        description="Powered by Ethereum Sepolia for secure and transparent settlements."
+                        description="Powered by Sui Testnet for secure and transparent settlements."
                     />
                 </div>
             </section>
@@ -108,7 +108,7 @@ export function Checkout() {
             </section>
 
             <footer className="border-t border-white/5 py-12 text-center text-white/20 text-[10px] uppercase tracking-[0.3em] font-bold">
-                <p>&copy; 2026 Polaris Protocol // Built on Ethereum Sepolia</p>
+                <p>&copy; 2026 XORR // Built on Sui Testnet</p>
             </footer>
         </div>
     );
